@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PortalHub.API/PortalHub.API.csproj" />
+  <Project Path="PortalHub.Application/PortalHub.Application.csproj" />
+  <Project Path="PortalHub.Domain/PortalHub.Domain.csproj" />
+  <Project Path="PortalHub.Infrastructure/PortalHub.Infrastructure.csproj" />
+</Solution>
