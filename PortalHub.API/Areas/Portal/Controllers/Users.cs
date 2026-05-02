@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Win32;
+using PortalHub.API.Common;
 using PortalHub.Application.Common;
 using PortalHub.Application.DTOs.Portal;
 using PortalHub.Application.Interfaces.Portal;
@@ -25,27 +26,38 @@ namespace PortalHub.API.Controllers
         public async Task<IActionResult> Get(long id)
         {
             var result = await _service.GetByIdAsync(id);
-            return Ok(result);
+            return this.FromServiceResult(result);
         }
 
         // ---------- REGISTER ----------
         [HttpPost("register")]
-        public async Task<IActionResult> Register(CreateUserDto dto)
+        public async Task<IActionResult> Register([FromBody] CreateUserDto dto)
         {
             var result = await _service.RegisterAsync(dto);
-            return result.Success ? Ok(result) : BadRequest(result);
+            return this.FromServiceResult(result);
         }
 
         // ---------- UPDATE PROFILE ----------
         [HttpPut("{userId:long}")]
-        public async Task<IActionResult> Update(long userId, UpdateUserDto dto)
+        public async Task<IActionResult> Update(long userId, [FromBody] UpdateUserDto dto)
         {
+            //var result = await _service.UpdateProfileAsync(userId, dto);
+
+            //if (!result.Success && result.ErrorCode == ErrorCodes.NotFound)
+            //    return NotFound(result);
+
+            //return result.Success ? Ok(result) : BadRequest(result);
+
             var result = await _service.UpdateProfileAsync(userId, dto);
 
-            if (!result.Success && result.ErrorCode == ErrorCodes.NotFound)
-                return NotFound(result);
+            if (userId != dto.UserId)
+            {
+                var mismatch = ServiceResult<UserDto>.Fail(
+                    "UserId mismatch", ErrorCodes.ValidationError);
+                return this.FromServiceResult(mismatch);
+            }
 
-            return result.Success ? Ok(result) : BadRequest(result);
+            return this.FromServiceResult(result);
         }
 
         // ---------- VERIFY EMAIL ----------
@@ -61,25 +73,17 @@ namespace PortalHub.API.Controllers
         //}
 
         [HttpPost("verify-email")]
-        public async Task<IActionResult> VerifyEmail(VerifyEmailDto dto)
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto)
         {
             var result = await _service.VerifyEmailAsync(dto);
-
-            if (!result.Success && result.ErrorCode == ErrorCodes.NotFound)
-                return NotFound(result);
-
-            return result.Success ? Ok(result) : BadRequest(result);
+            return this.FromServiceResult(result);
         }
 
         [HttpPost("verify-mobile")]
-        public async Task<IActionResult> VerifyMobile(VerifyMobileDto dto)
+        public async Task<IActionResult> VerifyMobile([FromBody] VerifyMobileDto dto)
         {
             var result = await _service.VerifyMobileAsync(dto);
-
-            if (!result.Success && result.ErrorCode == ErrorCodes.NotFound)
-                return NotFound(result);
-
-            return result.Success ? Ok(result) : BadRequest(result);
+            return this.FromServiceResult(result);
         }
 
     }

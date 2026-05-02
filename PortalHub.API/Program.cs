@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PortalHub.API.Common;
+using PortalHub.Application.Common;
 using PortalHub.Application.DTOs.Auth;
 using PortalHub.Application.DTOs.Master;
 using PortalHub.Application.DTOs.Portal;
@@ -68,6 +70,25 @@ var jwt = builder.Configuration
     .GetSection("Jwt")
     .Get<JwtSettings>();
 
+//builder.Services
+//    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidateAudience = true,
+//            ValidateLifetime = true,
+//            ValidateIssuerSigningKey = true,
+
+//            ValidIssuer = jwt.Issuer,
+//            ValidAudience = jwt.Audience,
+//            IssuerSigningKey =
+//                new SymmetricSecurityKey(
+//                    Encoding.UTF8.GetBytes(jwt.SecretKey))
+//        };
+//    });
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -78,14 +99,47 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-
             ValidIssuer = jwt.Issuer,
             ValidAudience = jwt.Audience,
-            IssuerSigningKey =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwt.SecretKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey))
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+
+                var response = new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Unauthorized",
+                    Data = null,
+                    Error = "401"
+                };
+
+                await context.Response.WriteAsJsonAsync(response);
+            },
+            OnForbidden = async context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json";
+
+                var response = new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Forbidden",
+                    Data = null,
+                    Error = "403"
+                };
+
+                await context.Response.WriteAsJsonAsync(response);
+            }
         };
     });
+
 
 
 
@@ -181,6 +235,7 @@ app.UseHttpsRedirection();
 app.UseMiddleware<IpBlockMiddleware>();
 
 /* IMPORTANT ORDER */
+app.UseMiddleware<ApiResponseMiddleware>();
 app.UseAuthentication();   // MUST COME FIRST
 app.UseAuthorization();    // THEN THIS
 

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalHub.API.Common;
+using PortalHub.Application.Common;
 using PortalHub.Application.DTOs.Master;
+using System.Numerics;
 
 namespace PortalHub.Api.Areas.Master.Controllers
 {
@@ -25,7 +28,8 @@ namespace PortalHub.Api.Areas.Master.Controllers
         public async Task<IActionResult> GetAll()
         {
             var plans = await _service.GetAllAsync();
-            return Ok(plans);
+            //return Ok(plans);
+            return this.FromServiceResult(plans);
         }
 
         // ==============================
@@ -36,44 +40,43 @@ namespace PortalHub.Api.Areas.Master.Controllers
         {
             var plan = await _service.GetByIdAsync(id);
 
-            if (plan == null)
-                return NotFound();
+            //if (plan == null)
+            //    return NotFound();
 
-            return Ok(plan);
+            //return Ok(plans);
+            return this.FromServiceResult(plan);
         }
 
         // ==============================
         // CREATE
         // ==============================
         [HttpPost]
-        public async Task<IActionResult> Create(
-            [FromBody] CreateSubscriptionPlanDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateSubscriptionPlanDto dto)
         {
             var result = await _service.CreateAsync(dto);
 
-            if (!result.Success)
-                return BadRequest(result);
+            //if (!result.Success)
+            //    return BadRequest(result);
 
-            return Ok(result);
+            //return Ok(result);
+            return this.FromServiceResult(result);
         }
 
         // ==============================
         // UPDATE
         // ==============================
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(
-            int id,
-            [FromBody] UpdateSubscriptionPlanDto dto)
+        public async Task<IActionResult> Update( int id,[FromBody] UpdateSubscriptionPlanDto dto)
         {
             if (id != dto.PlanId)
-                return BadRequest("PlanId mismatch");
+            {
+                var mismatch = ServiceResult<SubscriptionPlanDto>.Fail(
+                    "PlanId mismatch", ErrorCodes.ValidationError);
+                return this.FromServiceResult(mismatch);
+            }
 
             var result = await _service.UpdateAsync(dto);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return Ok(result);
+            return this.FromServiceResult(result);
         }
 
         // ==============================
@@ -83,16 +86,7 @@ namespace PortalHub.Api.Areas.Master.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteAsync(id);
-
-            if (!result.Success)
-            {
-                if (result.ErrorCode == "PLAN_ACTIVE")
-                    return Conflict(result); // better than BadRequest
-
-                return NotFound(result);
-            }
-
-            return Ok(result);
+            return this.FromServiceResult(result);
         }
     }
 }

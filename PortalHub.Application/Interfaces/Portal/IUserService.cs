@@ -12,6 +12,7 @@ namespace PortalHub.Application.Interfaces.Portal
 
         /* READ */
 
-        Task<UserDto?> GetByIdAsync(long userId);
+        //Task<UserDto?> GetByIdAsync(long userId);
+        Task<ServiceResult<UserDto>> GetByIdAsync(long userId);
     }
 }

@@ -25,17 +25,37 @@ public class CrudService<TEntity, TCreateDto, TUpdateDto, TResponseDto> :
         _validator = validator;
     }
 
-    public virtual async Task<IEnumerable<TResponseDto>> GetAllAsync()
+    //public virtual async Task<IEnumerable<TResponseDto>> GetAllAsync()
+    //{
+    //    var entities = await _queryRepo.GetAllAsync();
+    //    return _mapper.Map<IEnumerable<TResponseDto>>(entities);
+    //}
+
+    //public virtual async Task<TResponseDto?> GetByIdAsync(object id)
+    //{
+    //    var entity = await _queryRepo.GetByIdAsync(id);
+    //    return entity == null ? default : _mapper.Map<TResponseDto>(entity);
+    //}
+
+
+    public virtual async Task<ServiceResult<IEnumerable<TResponseDto>>> GetAllAsync()
     {
         var entities = await _queryRepo.GetAllAsync();
-        return _mapper.Map<IEnumerable<TResponseDto>>(entities);
+        var dtos = _mapper.Map<IEnumerable<TResponseDto>>(entities);
+
+        return ServiceResult<IEnumerable<TResponseDto>>.Ok(dtos, "Retrieved successfully");
     }
 
-    public virtual async Task<TResponseDto?> GetByIdAsync(object id)
+    public virtual async Task<ServiceResult<TResponseDto>> GetByIdAsync(object id)
     {
         var entity = await _queryRepo.GetByIdAsync(id);
-        return entity == null ? default : _mapper.Map<TResponseDto>(entity);
+        if (entity == null)
+            return ServiceResult<TResponseDto>.Fail("Not found", ErrorCodes.NotFound);
+
+        var dto = _mapper.Map<TResponseDto>(entity);
+        return ServiceResult<TResponseDto>.Ok(dto, "Retrieved successfully");
     }
+
 
     public virtual async Task<ServiceResult<TResponseDto>> CreateAsync(TCreateDto dto)
     {

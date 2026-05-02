@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalHub.API.Common;
+using PortalHub.Application.Common;
 using PortalHub.Application.DTOs.Portal;
 using PortalHub.Application.Services;
 
@@ -29,29 +31,31 @@ namespace PortalHub.Api.Areas.Portal.Controllers
         [HttpGet("{supplierId:long}")]
         public async Task<IActionResult> Get(long supplierId)
         {
-            var profile = await _service.GetByIdAsync(supplierId);
-            return profile == null ? NotFound() : Ok(profile);
+            var result = await _service.GetByIdAsync(supplierId);
+            return this.FromServiceResult(result);
         }
 
         // ---------- CREATE ----------
         [HttpPost]
-        public async Task<IActionResult> Create(CreateSupplierProfileDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateSupplierProfileDto dto)
         {
             var result = await _service.CreateAsync(dto);
-            return result.Success ? Ok(result) : BadRequest(result);
+            return this.FromServiceResult(result);
         }
 
         // ---------- UPDATE ----------
         [HttpPut("{supplierId:long}")]
-        public async Task<IActionResult> Update(
-            long supplierId,
-            UpdateSupplierProfileDto dto)
+        public async Task<IActionResult> Update( long supplierId, [FromBody] UpdateSupplierProfileDto dto)
         {
             if (supplierId != dto.SupplierId)
-                return BadRequest("SupplierId mismatch");
+            {
+                var mismatch = ServiceResult<SupplierProfileResponseDto>.Fail(
+                    "SupplierId mismatch", ErrorCodes.ValidationError);
+                return this.FromServiceResult(mismatch);
+            }
 
             var result = await _service.UpdateAsync(dto);
-            return result.Success ? Ok(result) : BadRequest(result);
+            return this.FromServiceResult(result);
         }
     }
 }

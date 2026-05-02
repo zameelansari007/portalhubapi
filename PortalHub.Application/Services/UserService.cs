@@ -244,12 +244,23 @@ namespace PortalHub.Application.Services
         }
 
 
-       
-        public async Task<UserDto?> GetByIdAsync(long userId)
+
+        //public async Task<UserDto?> GetByIdAsync(long userId)
+        //{
+        //    var entity = await _userRepo.GetByIdAsync(userId);
+        //    return entity == null ? default : _mapper.Map<UserDto>(entity);
+        //}
+        public async Task<ServiceResult<UserDto>> GetByIdAsync(long userId)
         {
             var entity = await _userRepo.GetByIdAsync(userId);
-            return entity == null ? default : _mapper.Map<UserDto>(entity);
+
+            if (entity == null)
+                return ServiceResult<UserDto>.Fail("User not found", ErrorCodes.NotFound);
+
+            var dto = _mapper.Map<UserDto>(entity);
+            return ServiceResult<UserDto>.Ok(dto, "Retrieved successfully");
         }
+
     }
 
 

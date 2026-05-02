@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using PortalHub.Application.Common;
 using PortalHub.Application.DTOs.Catalog;
 using PortalHub.Application.DTOs.Portal;
 using PortalHub.Application.Interfaces.Queries;
@@ -22,7 +23,7 @@ namespace PortalHub.Infrastructure.Dapper
             => new SqlConnection(_connectionString);
 
 
-        public async Task<IEnumerable<CategoryMenuDto>> GetCategoriesAsync(long supplierId)
+        public async Task<ServiceResult<IEnumerable<CategoryMenuDto>>> GetCategoriesAsync(long supplierId)
         {
             var sql = @"
 
@@ -49,10 +50,18 @@ ORDER BY c.SortOrder";
 
             using var conn = CreateConnection();
 
-            return await conn.QueryAsync<CategoryMenuDto>(sql, new { SupplierId = supplierId });
+            //return await conn.QueryAsync<CategoryMenuDto>(sql, new { SupplierId = supplierId });
+            
+            var categories = await conn.QueryAsync<CategoryMenuDto>(sql, new { SupplierId = supplierId });
+
+            if (!categories.Any())
+                return ServiceResult<IEnumerable<CategoryMenuDto>>.Fail("No categories found", ErrorCodes.NotFound);
+
+            return ServiceResult<IEnumerable<CategoryMenuDto>>.Ok(categories, "Categories retrieved successfully");
+
         }
 
-        public async Task<PagedResultDto<ProductListDto>> GetProductsAsync(ProductListRequestDto request)
+        public async Task<ServiceResult<PagedResultDto<ProductListDto>>> GetProductsAsync(ProductListRequestDto request)
         {
             var offset = (request.PageNumber - 1) * request.PageSize;
 
@@ -102,7 +111,19 @@ FETCH NEXT @PageSize ROWS ONLY";
 
             var items = (await multi.ReadAsync<ProductListDto>()).ToList();
 
-            return new PagedResultDto<ProductListDto>
+            //return new PagedResultDto<ProductListDto>
+            //{
+            //    PageNumber = request.PageNumber,
+            //    PageSize = request.PageSize,
+            //    TotalRecords = total,
+            //    TotalPages = (int)Math.Ceiling((double)total / request.PageSize),
+            //    Items = items
+            //};
+
+            if (!items.Any())
+                return ServiceResult<PagedResultDto<ProductListDto>>.Fail("No products found", ErrorCodes.NotFound);
+
+            var pagedResult = new PagedResultDto<ProductListDto>
             {
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
@@ -110,6 +131,12 @@ FETCH NEXT @PageSize ROWS ONLY";
                 TotalPages = (int)Math.Ceiling((double)total / request.PageSize),
                 Items = items
             };
+
+            return ServiceResult<PagedResultDto<ProductListDto>>.Ok(pagedResult, "Products retrieved successfully");
+
+
+
+
         }
 
     }
