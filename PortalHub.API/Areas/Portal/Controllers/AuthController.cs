@@ -33,4 +33,28 @@ public class AuthController : ControllerBase
 
         return this.FromServiceResult(result);
     }
+
+    [HttpPost("forgot-password")]
+public async Task<IActionResult> ForgotPassword(
+    [FromBody] ForgotPasswordDto dto)
+{
+    return this.FromServiceResult(
+        await _auth.ForgotPasswordAsync(dto));
+}
+
+[HttpPost("verify-reset-otp")]
+public async Task<IActionResult> VerifyResetOtp(
+    [FromBody] VerifyResetOtpDto dto)
+{
+    return this.FromServiceResult(
+        await _auth.VerifyResetOtpAsync(dto));
+}
+
+[HttpPost("reset-password")]
+public async Task<IActionResult> ResetPassword(
+    [FromBody] ResetPasswordDto dto)
+{
+    return this.FromServiceResult(
+        await _auth.ResetPasswordAsync(dto));
+}
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PortalHub.Domain.Models.EnquiryMst;
 using PortalHub.Domain.Models.Master;
 using PortalHub.Domain.Models.Portal;
 
@@ -31,6 +32,15 @@ namespace PortalHub.Infrastructure
         public DbSet<Product> Products => Set<Product>();
         public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
         public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+
+        public DbSet<Country> Countries => Set<Country>();
+        public DbSet<State> States => Set<State>();
+        public DbSet<City> Cities => Set<City>();
+
+        public DbSet<Enquiry> Enquiries => Set<Enquiry>();
+        public DbSet<EnquiryStatus> EnquiryStatus => Set<EnquiryStatus>();
+        public DbSet<EnquiryFollowup> EnquiryFollowups => Set<EnquiryFollowup>();
+        public DbSet<EnquiryForward> EnquiryForwards => Set<EnquiryForward>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -245,6 +255,84 @@ modelBuilder.Entity<BlockedIp>()
                 .HasOne(us => us.PaymentStatus)
                 .WithMany()
                 .HasForeignKey(us => us.PaymentStatusId);
+
+                //================= city , state, country relation
+
+                modelBuilder.Entity<Country>()
+    .ToTable("Countries", "Master")
+    .HasKey(x => x.CountryId);
+
+modelBuilder.Entity<State>()
+    .ToTable("States", "Master")
+    .HasKey(x => x.StateId);
+
+modelBuilder.Entity<City>()
+    .ToTable("Cities", "Master")
+    .HasKey(x => x.CityId);
+
+modelBuilder.Entity<State>()
+    .HasOne(x => x.Country)
+    .WithMany(x => x.States)
+    .HasForeignKey(x => x.CountryId);
+
+modelBuilder.Entity<City>()
+    .HasOne(x => x.State)
+    .WithMany(x => x.Cities)
+    .HasForeignKey(x => x.StateId);
+
+    modelBuilder.Entity<SupplierProfile>()
+    .HasOne(x => x.Country)
+    .WithMany()
+    .HasForeignKey(x => x.CountryId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+modelBuilder.Entity<SupplierProfile>()
+    .HasOne(x => x.State)
+    .WithMany()
+    .HasForeignKey(x => x.StateId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+modelBuilder.Entity<SupplierProfile>()
+    .HasOne(x => x.City)
+    .WithMany()
+    .HasForeignKey(x => x.CityId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+   //================================ Enquiry -------
+
+modelBuilder.Entity<Enquiry>()
+    .ToTable("Enquiries", "Portal")
+    .HasKey(x => x.EnquiryId);
+
+modelBuilder.Entity<EnquiryFollowup>()
+    .ToTable("EnquiryFollowups", "Portal")
+    .HasKey(x => x.FollowupId);
+
+modelBuilder.Entity<EnquiryForward>()
+    .ToTable("EnquiryForwards", "Portal")
+    .HasKey(x => x.ForwardId);
+
+modelBuilder.Entity<EnquiryStatus>()
+    .ToTable("EnquiryStatus", "Portal")
+    .HasKey(x => x.EnquiryStatusId);
+
+// relations
+modelBuilder.Entity<EnquiryFollowup>()
+    .HasOne<Enquiry>()
+    .WithMany()
+    .HasForeignKey(x => x.EnquiryId);
+
+modelBuilder.Entity<EnquiryForward>()
+    .HasOne<Enquiry>()
+    .WithMany()
+    .HasForeignKey(x => x.EnquiryId);
+
+
+
+
+    
         }
+
+
     }
 }

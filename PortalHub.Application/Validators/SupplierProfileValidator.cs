@@ -11,18 +11,28 @@ namespace PortalHub.Application.Validators.Portal
     {
         public SupplierProfileValidator()
         {
-            RuleFor(x => x.SupplierId).GreaterThan(0);
+            RuleFor(x => x.SupplierId)
+                .GreaterThan(0);
 
             RuleFor(x => x.BusinessName)
-                .NotEmpty().MaximumLength(200);
+                .NotEmpty()
+                .MaximumLength(200);
 
             RuleFor(x => x.OfficeAddressLine1)
                 .NotEmpty();
 
-            RuleFor(x => x.City).NotEmpty();
-            RuleFor(x => x.State).NotEmpty();
-            RuleFor(x => x.Pincode).NotEmpty();
-            RuleFor(x => x.Country).NotEmpty();
+            RuleFor(x => x.CountryId)
+                .GreaterThan(0);
+
+            RuleFor(x => x.StateId)
+                .GreaterThan(0);
+
+            RuleFor(x => x.CityId)
+                .GreaterThan(0);
+
+            RuleFor(x => x.Pincode)
+                .NotEmpty()
+                .MaximumLength(20);
         }
     }
 }

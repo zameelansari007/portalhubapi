@@ -94,5 +94,49 @@ namespace PortalHub.Infrastructure.EF.Repositories
                 .AnyAsync(x => x.IpAddress == ip && x.BlockedUntil > DateTime.UtcNow);
         }
 
+        public async Task<User?> GetByEmailAsync(string email)
+{
+    return await _context.Users
+        .FirstOrDefaultAsync(x => x.Email == email);
+}
+
+public async Task SaveOtpAsync(UserOtp otp)
+{
+    _context.UserOtps.Add(otp);
+    await _context.SaveChangesAsync();
+}
+
+public async Task<UserOtp?> GetValidOtpAsync(
+    long userId,
+    string otpCode,
+    OtpType otpType)
+{
+    return await _context.UserOtps
+        .FirstOrDefaultAsync(x =>
+            x.UserId == userId &&
+            x.OtpCode == otpCode &&
+            x.OtpType == otpType &&
+            !x.IsUsed &&
+            x.ExpireAt > DateTime.UtcNow);
+}
+
+public async Task UpdateOtpAsync(UserOtp otp)
+{
+    _context.UserOtps.Update(otp);
+    await _context.SaveChangesAsync();
+}
+
+public async Task<UserPassword?> GetPasswordAsync(long userId)
+{
+    return await _context.UserPasswords
+        .FirstOrDefaultAsync(x => x.UserId == userId);
+}
+
+public async Task UpdatePasswordAsync(UserPassword password)
+{
+    _context.UserPasswords.Update(password);
+    await _context.SaveChangesAsync();
+}
+
     }
 }

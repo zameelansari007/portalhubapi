@@ -39,20 +39,27 @@ builder.Services.Configure<JwtSettings>(
 // DI
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>(); 
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-builder.Services.AddScoped( typeof(IQueryRepository<>),typeof(DapperQueryRepository<>));
+builder.Services.AddScoped(typeof(IQueryRepository<>), typeof(DapperQueryRepository<>));
 builder.Services.AddScoped<IUserService, UserService>();
 
 
-builder.Services.AddScoped<ICrudService<CreateSubscriptionPlanDto,UpdateSubscriptionPlanDto,SubscriptionPlanDto>,SubscriptionPlanService>();
-builder.Services.AddScoped<ICrudService<CreateSupplierProfileDto,UpdateSupplierProfileDto,SupplierProfileResponseDto>,SupplierProfileService>();
-builder.Services.AddScoped<ICrudService<CreateProductDto, UpdateProductDto, ProductResponseDto>,ProductService>();
-builder.Services.AddScoped<ICrudService<CreateCategoryDto, UpdateCategoryDto, CategoryResponseDto>,CategoryService>();
-builder.Services.AddScoped<ICrudService<CreateProductVariantDto, UpdateProductVariantDto, ProductVariantResponseDto>,ProductVariantService>();
+builder.Services.AddScoped<ICrudService<CreateSubscriptionPlanDto, UpdateSubscriptionPlanDto, SubscriptionPlanDto>, SubscriptionPlanService>();
+//builder.Services.AddScoped<ICrudService<CreateSupplierProfileDto,UpdateSupplierProfileDto,SupplierProfileResponseDto>,SupplierProfileService>();
+builder.Services.AddScoped<ICrudService<CreateProductDto, UpdateProductDto, ProductResponseDto>, ProductService>();
+builder.Services.AddScoped<ICrudService<CreateCategoryDto, UpdateCategoryDto, CategoryResponseDto>, CategoryService>();
+builder.Services.AddScoped<ICrudService<CreateProductVariantDto, UpdateProductVariantDto, ProductVariantResponseDto>, ProductVariantService>();
 builder.Services.AddScoped<ICrudService<CreateProductImageDto, UpdateProductImageDto, ProductImageResponseDto>, ProductImageService>();
 
 builder.Services.AddScoped<ICatalogQueryRepository, CatalogQueryRepository>();
+builder.Services.AddScoped<ISupplierProfileQueryRepository, SupplierProfileQueryRepository>();
+builder.Services.AddScoped<ICrudService<CreateSupplierProfileDto,UpdateSupplierProfileDto,SupplierProfileResponseDto>,SupplierProfileService>();
+builder.Services.AddScoped<ICrudService<CreateCountryDto,UpdateCountryDto,CountryResponseDto>,CountryService>();
+builder.Services.AddScoped<ICrudService<CreateStateDto,UpdateStateDto,StateResponseDto>,StateService>();
+builder.Services.AddScoped<ICrudService<CreateCityDto,UpdateCityDto,CityResponseDto>,CityService>();
+
+builder.Services.AddScoped<IEnquiryService, EnquiryService>();
 
 // automapper
 builder.Services.AddAutoMapper(

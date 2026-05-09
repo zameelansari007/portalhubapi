@@ -9,12 +9,22 @@ namespace PortalHub.Application.Mappings
         public SupplierProfileMapping()
         {
             CreateMap<CreateSupplierProfileDto, SupplierProfile>()
-                .ForMember(d => d.CreatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
+                .ForMember(d => d.CreatedAt,
+                    o => o.MapFrom(_ => DateTime.UtcNow));
 
             CreateMap<UpdateSupplierProfileDto, SupplierProfile>()
-                .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
+                .ForMember(d => d.UpdatedAt,
+                    o => o.MapFrom(_ => DateTime.UtcNow));
 
-            CreateMap<SupplierProfile, SupplierProfileResponseDto>();
+            CreateMap<SupplierProfile, SupplierProfileResponseDto>()
+                .ForMember(d => d.CountryName,
+                    o => o.MapFrom(s => s.Country.CountryName))
+
+                .ForMember(d => d.StateName,
+                    o => o.MapFrom(s => s.State.StateName))
+
+                .ForMember(d => d.CityName,
+                    o => o.MapFrom(s => s.City.CityName));
         }
     }
 }
